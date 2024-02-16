@@ -1,0 +1,75 @@
+import os
+import speech_recognition as sr
+import win32com.client
+import webbrowser
+import datetime
+
+a = win32com.client.Dispatch("SAPI.SpVoice")
+
+
+def say(text):
+    a.Speak(text)
+
+
+def takeCommand():
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        r.pause_threshold = 0.8  # Adjust the pause threshold
+        print("Listening...")
+        audio = r.listen(source)
+        try:
+            query = r.recognize_google(audio, language='en-in')
+            print(f"User said: {query}")
+            return query
+        except sr.UnknownValueError:
+            print("Sorry, I didn't catch that. Could you please repeat?")
+            return "unknown value error"
+        except sr.RequestError as e:
+            print(f"Speech recognition request failed: {e}")
+            return "request error"
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return "some error occurred"
+
+
+if __name__ == '__main__':
+    print('PyCharm')
+    say("Hello sir")
+
+    while True:
+        text = takeCommand()
+        sites = [["youtube", "https://www.youtube.com/watch?v=kpNYfy0Do0I"],
+                 ["github", "https://github.com"],
+                 ["tailwind", "https://tailwindcss.com"],
+                 ["chatgpt", "https://chat.openai.com"]]
+
+        for site in sites:
+            if site[0].lower() in text.lower():
+                say(f"opening {site[0]} mr.stark")
+                webbrowser.open(site[1])
+                break  # exit the for loop after opening the requested site
+
+        if "what is time" in text.lower() or "tell me timing" in text.lower():
+            current_time= datetime.datetime.now().strftime("%I:%M:%S %p")
+            say(f"the time is {current_time} is anything sir")
+
+        apps = {
+            "camera": "start microsoft.windows.camera:",
+            "vs code": "code",
+            "file explorer": "explorer",
+            "recycle bin": "start shell:RecycleBinFolder"
+        }
+
+        for app, command in apps.items():
+            if f"open {app}" in text.lower():
+                os.system(command)
+                say(f"opening {app} sir")
+
+        # if "error" in text.lower() or "exit" in text.lower():
+        # print("Exiting...")
+        # break
+        say(text)
+
+
+
+
